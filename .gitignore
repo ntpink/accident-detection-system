@@ -1,0 +1,48 @@
+# Python virtual environment
+venv/
+env/
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# File biến môi trường chứa mật khẩu (Bảo vệ bảo mật, không đưa lên GitHub)
+backend/.env
+.env
+.env.local
+
+# File SQLite local nếu có
+*.db
+*.sqlite3
+
+# Trọng số mô hình AI (File epoch61.pt ~110MB vượt giới hạn 100MB của GitHub sẽ bị chặn push;
+# Hệ thống đã lập trình tự động tải từ Hugging Face khi chạy lần đầu)
+backend/weights/*.pt
+backend/weights/*.bin
+backend/weights/*.onnx
+
+# Thư mục lưu trữ video & kết quả (tránh đẩy video nặng lên git)
+backend/storage/videos/*
+!backend/storage/videos/.gitkeep
+backend/storage/evidence/*
+!backend/storage/evidence/.gitkeep
+backend/storage/results/*
+!backend/storage/results/.gitkeep
+backend/weights/*
+!backend/weights/.gitkeep
+backend/storage/videos/temp/
+
+# Node / Frontend
+frontend/node_modules/
+frontend/.vite/
+frontend/dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
