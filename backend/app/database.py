@@ -75,8 +75,25 @@ def get_engine_and_session():
             print("=> Sai thông tin đăng nhập (USER hoặc PASSWORD) trong file .env!", file=sys.stderr)
             print("   Vui lòng kiểm tra lại cấu hình DATABASE_URL trong backend/.env", file=sys.stderr)
         elif "unknown database" in err_str:
-            print("=> Database 'traffic_accident' chưa tồn tại!", file=sys.stderr)
-            print("   Vui lòng chạy file scripts/init_db.sql để khởi tạo database trong MySQL.", file=sys.stderr)
+            print("=> Database 'traffic_accident' chưa tồn tại! Đang tự động khởi tạo trên MySQL...", file=sys.stderr)
+            try:
+                import re
+                from sqlalchemy import text
+                # Cắt bỏ tên database để kết nối tới MySQL server gốc
+                base_url = re.sub(r'/[a-zA-Z0-9_]+(\?.*)?$', r'/\1', db_url)
+                temp_engine = create_engine(base_url, isolation_level="AUTOCOMMIT")
+                with temp_engine.connect() as conn:
+                    conn.execute(text("CREATE DATABASE IF NOT EXISTS traffic_accident CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"))
+                temp_engine.dispose()
+                print("[+] Đã tự động tạo Database 'traffic_accident' thành công!", file=sys.stderr)
+                
+                # Thử kết nối lại sau khi đã tạo database
+                engine = create_engine(db_url, pool_pre_ping=True, pool_recycle=3600, echo=False)
+                with engine.connect():
+                    pass
+                return engine, sessionmaker(autocommit=False, autoflush=False, bind=engine)
+            except Exception as ce:
+                print(f"[!] Không thể tự động tạo database: {ce}", file=sys.stderr)
         elif "can't connect" in err_str or "connection refused" in err_str or "2003" in err_str:
             print("=> Không thể kết nối tới dịch vụ MySQL!", file=sys.stderr)
             print("   Vui lòng kiểm tra dịch vụ MySQL Server đã được bật và đang lắng nghe cổng 3306 chưa.", file=sys.stderr)
